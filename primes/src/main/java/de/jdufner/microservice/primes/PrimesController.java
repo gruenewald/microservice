@@ -1,24 +1,36 @@
+/*
+ * Copyright 2016, Jürgen Dufner
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package de.jdufner.microservice.primes;
 
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.discovery.DiscoveryClient;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static java.lang.Math.sqrt;
 
 /**
- * Created by jdufner on 08.12.16.
+ * @author Jürgen Dufner
+ * @since 0.0.1
  */
 @RestController
 @EnableAutoConfiguration
@@ -26,29 +38,23 @@ public class PrimesController {
 
   private static final Logger LOG = LoggerFactory.getLogger(PrimesController.class);
 
-  @Autowired
-  private DiscoveryClient discoveryClient;
+  private final AtomicLong counter = new AtomicLong();
 
-  @RequestMapping("/service-instances/{applicationName}")
-  public List<ServiceInstance> serviceInstancesByApplicationName(
-      @PathVariable String applicationName) {
-    return this.discoveryClient.getInstances(applicationName);
-  }
-
-  @HystrixCommand(fallbackMethod = "primes")
   @RequestMapping(path = "/")
-  public List<Integer> primes2() {
-    List<Integer> primzahlen = new ArrayList<>();
-    int divisionCounter = 0;
-    int max = 1000000;
-    for(int divisor = 2; divisor < max; divisor++) {
-      boolean istPrimzahl = true;
-      int wurzel = (int) sqrt(divisor);
-      for (int primzahl : primzahlen) {
-        if (primzahl <= wurzel) {
+  public PrimesResult primes(@RequestParam(value = "maxPrimeNumber", defaultValue = "1000000") int maxPrimeNumber) {
+    LOG.info("Ermittle alle Primzahlen bis {}.", maxPrimeNumber);
+    PrimesResult primesResult = new PrimesResult();
+    primesResult.setId(counter.incrementAndGet());
+    List<Integer> primeNumbers = new ArrayList<>();
+    long divisionCounter = 0;
+    for (int divisor = 2; divisor < maxPrimeNumber; divisor++) {
+      boolean isPrimeNumber = true;
+      int sqrt = (int) sqrt(divisor);
+      for (int primeNumber : primeNumbers) {
+        if (primeNumber <= sqrt) {
           divisionCounter++;
-          if (divisor % primzahl == 0) {
-            istPrimzahl = false;
+          if (divisor % primeNumber == 0) {
+            isPrimeNumber = false;
             break;
           }
         } else {
@@ -58,20 +64,18 @@ public class PrimesController {
 //      for (int dividend = 2; dividend <= wurzel; dividend++) {
 //        divisionCounter++;
 //        if (divisor % dividend == 0) {
-//          istPrimzahl = false;
+//          isPrimeNumber = false;
 //          break;
 //        }
 //      }
-      if (istPrimzahl) {
-        primzahlen.add(divisor);
+      if (isPrimeNumber) {
+        primeNumbers.add(divisor);
       }
     }
-    LOG.info("Für die Berechnung von Primzahlen bis {} waren {} Divisionen nötig.", max, divisionCounter);
-    return primzahlen;
-  }
-
-  public List<Integer> primes() {
-    return Arrays.asList(2, 3, 5, 7, 9);
+    LOG.info("Für die Berechnung von Primzahlen bis {} waren {} Divisionen nötig.", maxPrimeNumber, divisionCounter);
+    primesResult.setPrimeNumbers(primeNumbers);
+    primesResult.setDivisionCounter(divisionCounter);
+    return primesResult;
   }
 
 }
