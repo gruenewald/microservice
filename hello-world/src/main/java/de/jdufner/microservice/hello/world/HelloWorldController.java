@@ -21,7 +21,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+import java.net.InetAddress;
 import java.net.URI;
+import java.net.UnknownHostException;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
@@ -42,16 +44,25 @@ public class HelloWorldController {
     greeting.setId(counter.incrementAndGet());
     greeting.setMessage("Hello " + name + "!");
     greeting.setPrimes(getPrimesSmallerThan(1000));
+    greeting.setHostname(getHostname());
     return greeting;
   }
 
-  private String getPrimesSmallerThan(int limit) throws Exception {
+  private List<Integer> getPrimesSmallerThan(int limit) throws Exception {
     RestTemplate restTemplate = new RestTemplate();
     URI uri = new URI("http://localhost:9190/");
     PrimeNumbers primes = restTemplate.getForObject(uri, PrimeNumbers.class);
     List<Integer> limitedPrimes = primes.getPrimeNumbers().stream().filter(i -> i < limit).collect(Collectors.toList());
     primes.setPrimeNumbers(limitedPrimes);
-    return limitedPrimes.toString();
+    return limitedPrimes;
+  }
+
+  private String getHostname() {
+    try {
+      return InetAddress.getLocalHost().getHostName();
+    } catch (UnknownHostException e) {
+      throw new RuntimeException(e);
+    }
   }
 
 }

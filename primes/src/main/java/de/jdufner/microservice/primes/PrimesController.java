@@ -22,6 +22,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
@@ -75,7 +77,16 @@ public class PrimesController {
     LOG.info("Für die Berechnung von Primzahlen bis {} waren {} Divisionen nötig.", maxPrimeNumber, divisionCounter);
     primesResult.setPrimeNumbers(primeNumbers);
     primesResult.setDivisionCounter(divisionCounter);
+    primesResult.setHostname(getHostname());
     return primesResult;
+  }
+
+  private String getHostname() {
+    try {
+      return InetAddress.getLocalHost().getHostName();
+    } catch (UnknownHostException e) {
+      throw new RuntimeException(e);
+    }
   }
 
 }

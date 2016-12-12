@@ -48,3 +48,8 @@ oder
 ````
 java -jar -Dspring.profiles.active=docker primes-0.0.1-SNAPSHOT.jar
 ````
+
+## Actuator
+
+Spring Boot liefert sog. Actuators mit. Wir aktivieren die Actuators, weil sie
+von die Netflix-Services für die Überwachung benötigt werden.

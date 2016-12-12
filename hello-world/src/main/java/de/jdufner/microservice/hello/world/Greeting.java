@@ -15,6 +15,8 @@
  */
 package de.jdufner.microservice.hello.world;
 
+import java.util.List;
+
 /**
  * @author Jürgen Dufner
  * @since 0.0.1
@@ -23,7 +25,8 @@ public class Greeting {
 
   private long id;
   private String message;
-  private String primes;
+  private List<Integer> primes;
+  private String hostname;
 
   public long getId() {
     return id;
@@ -41,12 +44,19 @@ public class Greeting {
     this.message = message;
   }
 
-  public String getPrimes() {
+  public List<Integer> getPrimes() {
     return primes;
   }
 
-  public void setPrimes(final String primes) {
+  public void setPrimes(final List<Integer> primes) {
     this.primes = primes;
   }
 
+  public void setHostname(final String hostname) {
+    this.hostname = hostname;
+  }
+
+  public String getHostname() {
+    return hostname;
+  }
 }
