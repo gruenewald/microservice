@@ -15,6 +15,7 @@
  */
 package de.jdufner.microservice.primes;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -41,7 +42,8 @@ public class PrimesController {
   private static final Logger LOG = LoggerFactory.getLogger(PrimesController.class);
 
   private final AtomicLong counter = new AtomicLong();
-
+  
+  @HystrixCommand
   @RequestMapping(path = "/")
   public PrimesResult primes(@RequestParam(value = "maxPrimeNumber", defaultValue = "1000000") int maxPrimeNumber) {
     LOG.info("Ermittle alle Primzahlen bis {}.", maxPrimeNumber);
