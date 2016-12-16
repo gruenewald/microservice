@@ -1,0 +1,34 @@
+service-registry:
+  image: service-registry:latest
+  ports:
+    - "8761:8761"
+  volumes:
+    - /opt/log/service-registry:/log
+gateway:
+  image: gateway:latest
+  ports:
+    - "8080:8080"
+  links:
+    - service-registry
+  volumes:
+    - /opt/log/gateway:/log
+monitor:
+  image: monitor:latest
+  ports:
+    - "8180:8080"
+  links:
+    - service-registry
+  volumes:
+    - /opt/log/monitor:/log
+hello-world:
+  image: hello-world:latest
+  links:
+    - service-registry
+  volumes:
+    - /opt/log/hello-world:/log
+primes:
+  image: primes:latest
+  links:
+    - service-registry
+  volumes:
+    - /opt/log/primes:/log
